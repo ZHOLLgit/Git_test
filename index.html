@@ -4,7 +4,57 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>测试网页 · Git_test</title>
+<script>
+  // 首屏渲染前应用已保存的主题，避免出现主题闪烁。
+  (function () {
+    try {
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.dataset.theme = 'light';
+      }
+    } catch (err) {
+      /* localStorage 不可用时沿用默认深色主题 */
+    }
+  })();
+</script>
 <style>
+  :root {
+    color-scheme: dark;
+    --page-bg: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    --text: #e8f1f2;
+    --card-bg: rgba(255, 255, 255, 0.07);
+    --card-border: rgba(255, 255, 255, 0.14);
+    --card-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    --badge-bg: rgba(80, 250, 200, 0.15);
+    --badge-border: rgba(80, 250, 200, 0.4);
+    --badge-text: #6ef7cf;
+    --paragraph: #c9d6df;
+    --clock: #ffffff;
+    --date: #9fb3bd;
+    --meta: #8aa0ab;
+    --divider: rgba(255, 255, 255, 0.12);
+    --toggle-bg: rgba(255, 255, 255, 0.1);
+    --toggle-border: rgba(255, 255, 255, 0.2);
+    --toggle-hover: rgba(255, 255, 255, 0.2);
+  }
+  html[data-theme="light"] {
+    color-scheme: light;
+    --page-bg: linear-gradient(135deg, #eef7fa 0%, #e2eff4 50%, #cfe4ec 100%);
+    --text: #1d2b32;
+    --card-bg: rgba(255, 255, 255, 0.78);
+    --card-border: rgba(15, 32, 39, 0.12);
+    --card-shadow: 0 24px 60px rgba(15, 32, 39, 0.16);
+    --badge-bg: rgba(0, 150, 120, 0.1);
+    --badge-border: rgba(0, 150, 120, 0.35);
+    --badge-text: #0a7c63;
+    --paragraph: #3f565f;
+    --clock: #0f2027;
+    --date: #5c7883;
+    --meta: #5c7883;
+    --divider: rgba(15, 32, 39, 0.12);
+    --toggle-bg: rgba(255, 255, 255, 0.85);
+    --toggle-border: rgba(15, 32, 39, 0.16);
+    --toggle-hover: #ffffff;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     min-height: 100vh;
@@ -12,19 +62,48 @@
     align-items: center;
     justify-content: center;
     font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
-    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-    color: #e8f1f2;
+    background: var(--page-bg);
+    color: var(--text);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid var(--toggle-border);
+    border-radius: 999px;
+    background: var(--toggle-bg);
+    color: var(--text);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .theme-toggle:hover { background: var(--toggle-hover); transform: translateY(-1px); }
+  .theme-toggle:active { transform: translateY(0) scale(0.96); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--badge-text); outline-offset: 3px; }
+  /* 窄屏或矮窗口时给固定按钮留出空间，避免遮挡卡片。 */
+  @media (max-width: 430px), (max-height: 560px) {
+    body { padding-top: 80px; }
   }
   .card {
     max-width: 560px;
     margin: 24px;
     padding: 48px 40px;
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
     text-align: center;
     backdrop-filter: blur(8px);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   }
   h1 { font-size: 1.9rem; letter-spacing: 0.04em; margin-bottom: 10px; }
   .badge {
@@ -34,28 +113,29 @@
     border-radius: 999px;
     font-size: 0.82rem;
     letter-spacing: 0.08em;
-    background: rgba(80, 250, 200, 0.15);
-    border: 1px solid rgba(80, 250, 200, 0.4);
-    color: #6ef7cf;
+    background: var(--badge-bg);
+    border: 1px solid var(--badge-border);
+    color: var(--badge-text);
   }
-  p { line-height: 1.8; color: #c9d6df; margin-bottom: 26px; }
+  p { line-height: 1.8; color: var(--paragraph); margin-bottom: 26px; }
   #clock {
     font-size: 2.2rem;
     font-weight: 300;
     font-variant-numeric: tabular-nums;
-    color: #ffffff;
+    color: var(--clock);
     margin-bottom: 6px;
   }
-  #date { font-size: 0.9rem; color: #9fb3bd; margin-bottom: 30px; }
+  #date { font-size: 0.9rem; color: var(--date); margin-bottom: 30px; }
   .meta {
     font-size: 0.78rem;
-    color: #8aa0ab;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--meta);
+    border-top: 1px solid var(--divider);
     padding-top: 18px;
   }
 </style>
 </head>
 <body>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到浅色模式">☀️</button>
   <main class="card">
     <h1>测试网页运行正常 ✅</h1>
     <span class="badge">TEST PAGE</span>
@@ -75,6 +155,42 @@
     }
     tick();
     setInterval(tick, 1000);
+
+    const THEME_KEY = 'theme';
+    const root = document.documentElement;
+    const toggleButton = document.getElementById('theme-toggle');
+
+    function currentTheme() {
+      return root.dataset.theme === 'light' ? 'light' : 'dark';
+    }
+
+    function renderToggle(theme) {
+      const dark = theme === 'dark';
+      toggleButton.textContent = dark ? '☀️' : '🌙';
+      toggleButton.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式');
+      toggleButton.title = dark ? '切换到浅色模式' : '切换到深色模式';
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        root.dataset.theme = 'light';
+      } else {
+        delete root.dataset.theme;
+      }
+      renderToggle(theme);
+    }
+
+    toggleButton.addEventListener('click', function () {
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch (err) {
+        /* localStorage 不可用时仅本次生效 */
+      }
+    });
+
+    applyTheme(currentTheme());
   </script>
 </body>
 </html>
